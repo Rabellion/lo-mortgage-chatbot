@@ -27,7 +27,7 @@ from src.config import settings
 
 console = Console()
 
-CFPB_API_URL = "https://api.consumerfinance.gov/data/complaints"
+CFPB_API_URL = "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/"
 CFPB_OUTPUT = settings.data_raw_dir / "cfpb_complaints.json"
 
 FINANCEBENCH_URL = (
@@ -37,7 +37,7 @@ FINANCEBENCH_OUTPUT = settings.data_raw_dir / "financebench.jsonl"
 
 
 def download_cfpb(limit: int = 10000) -> None:
-    """Download mortgage complaints from CFPB public API."""
+    """Download mortgage complaints from CFPB public API (v1 search endpoint)."""
     console.rule("[bold blue]CFPB Complaints")
 
     if CFPB_OUTPUT.exists():
@@ -46,17 +46,10 @@ def download_cfpb(limit: int = 10000) -> None:
 
     console.print(f"Fetching up to [bold]{limit}[/bold] mortgage complaints from CFPB API...")
 
-    params = {
-        "product": "Mortgage",
-        "has_narrative": "true",
-        "size": min(limit, 10000),  # API max per request
-        "sort": "created_date_desc",
-        "format": "json",
-    }
-
+    # The v1 search API uses 'frm' (not 'from') for offset and returns a flat list of hits.
+    # Page size capped at 100 (API enforced).
+    PAGE_SIZE = 100
     all_hits = []
-    fetched = 0
-    page_size = 100
 
     with Progress(
         SpinnerColumn(),
@@ -67,26 +60,39 @@ def download_cfpb(limit: int = 10000) -> None:
     ) as progress:
         task = progress.add_task("Downloading complaints...", total=limit)
 
-        while fetched < limit:
-            batch_size = min(page_size, limit - fetched)
-            params["size"] = batch_size
-            params["from"] = fetched
+        while len(all_hits) < limit:
+            params = {
+                "product": "Mortgage",
+                "has_narrative": "true",
+                "size": min(PAGE_SIZE, limit - len(all_hits)),
+                "frm": len(all_hits),
+                "sort": "created_date_desc",
+                "format": "json",
+                "no_aggs": "true",
+            }
 
             resp = requests.get(CFPB_API_URL, params=params, timeout=30)
             resp.raise_for_status()
 
             data = resp.json()
-            hits = data.get("hits", {}).get("hits", [])
+
+            # v1 API returns a flat list of hit objects
+            if isinstance(data, list):
+                hits = data
+            else:
+                # fallback: try nested structure
+                hits = data.get("hits", {}).get("hits", [])
+
             if not hits:
                 break
 
             all_hits.extend(hits)
-            fetched += len(hits)
-            progress.update(task, completed=fetched)
+            progress.update(task, completed=len(all_hits))
 
-            if len(hits) < batch_size:
-                break
+            if len(hits) < PAGE_SIZE:
+                break  # last page
 
+    all_hits = all_hits[:limit]
     CFPB_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     with open(CFPB_OUTPUT, "w", encoding="utf-8") as f:
         json.dump(all_hits, f, ensure_ascii=False, indent=2)
