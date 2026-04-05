@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "lo-mortgage-chatbot"
+version = "0.1.0"
+description = "LO Mortgage Chatbot — RAFT fine-tuned Gemma 4 31B"
+requires-python = ">=3.10"
+dependencies = [
+    # Data & config
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "python-dotenv>=1.0",
+    # Data loading
+    "requests>=2.31",
+    "httpx>=0.27",
+    "tqdm>=4.66",
+    "rich>=13.0",
+    # Document processing
+    "langchain>=0.2",
+    "langchain-community>=0.2",
+    "pypdf>=4.0",
+    "python-docx>=1.1",
+    "beautifulsoup4>=4.12",
+    # Embeddings & vector store
+    "sentence-transformers>=3.0",
+    "pinecone>=3.0",
+    # RAFT synthesis
+    "openai>=1.30",
+    # ML / training
+    "torch>=2.3",
+    "transformers>=4.42",
+    "datasets>=2.20",
+    "accelerate>=0.30",
+    "peft>=0.11",
+    "trl>=0.9",
+    # Experiment tracking
+    "wandb>=0.17",
+]
+
+[project.optional-dependencies]
+api = [
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.30",
+    "sse-starlette>=2.1",
+    "redis>=5.0",
+]
+eval = [
+    "ragas>=0.1",
+    "deepeval>=0.21",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

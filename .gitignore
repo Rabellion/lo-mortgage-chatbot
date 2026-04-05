@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data files (large)
+data/raw/
+data/processed/
+data/raft_triplets/*.jsonl
+data/evaluation/*.jsonl
+*.csv
+*.parquet
+
+# Model artifacts
+models/
+checkpoints/
+*.safetensors
+*.bin
+*.gguf
+
+# Vector stores
+chroma_db/
+data/vector_store/
+*.faiss
+
+# Claude / agent internals
+.claude/
+.gemini/
+
+# Logs
+logs/
+*.log
+wandb/
+
+# Docker
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
