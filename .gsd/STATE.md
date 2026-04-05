@@ -11,7 +11,7 @@
 - Project initialized: 2026-04-04
 - Sprint deadline: 2026-04-14 (10 days)
 - ML owner: Huzaifa Imran
-- H100 provisioned: ❌ Not yet — must be done before Phase 4
+- H100 provisioned: ✅ Live on RunPod (confirmed 2026-04-05)
 
 ## Decisions Made
 
@@ -23,8 +23,7 @@
 
 ## Blockers
 
-- `data/raw/` is empty — Phase 1 must complete before anything else runs
-- H100 not yet provisioned — needed for Phase 4
+- `data/raw/` is empty — Phase 1 must complete before training runs
 
 ## Next Steps
 
